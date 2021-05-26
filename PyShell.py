@@ -1,9 +1,14 @@
 import os
 import shutil
 import subprocess
+import pickle
+
+# +-------------------------------------------+
+# | DRIVER FUNCTIONS FOR IDENTIFYING COMMANDS |
+# +-------------------------------------------+
 
 curpath = os.getcwd()
-
+saveTo = os.path.dirname(__file__)
 
 def main():
     isPy = False
@@ -21,6 +26,7 @@ def main():
 
             elif command.lower() == 'py on':
                 isPy = True
+            
             else:
                 run_cmd(command)
 
@@ -110,11 +116,91 @@ def runManual(command):
             else:
                 return merge_GivenDirs(cmd, curpath, os.path.join(curpath, cmd[-1]), False)
 
+    elif command[:6] == 'speed ':
+        return speed_Command(command[6:])
+
     return False
 
 # +---------------------------------------+
 # | INDIVIDUAL FUNCTIONS FOR ALL COMMANDS |
 # +---------------------------------------+
+
+def speed_Command(choice):
+    
+    speedlist = {}
+    listLocation = os.path.join(saveTo, 'speed.pkl')
+    try:
+        speedFile = open(listLocation, "rb")
+        speedlist = pickle.load(speedFile)
+        speedFile.close()
+
+    except:
+        speedFile = open(listLocation, "wb")
+        pickle.dump(speedlist, speedFile)
+        speedFile.close()
+
+        try:
+            speedFile = open(listLocation, "rb")
+            speedlist = pickle.load(speedFile)
+            speedFile.close()
+        
+        except:
+            print('PYSH : Cannot run speed command feature.')
+    
+    if choice == 'show':
+        print('\n\tAlias\t\tCommand\n')
+        for alias in speedlist:
+            print(f"\t{alias}\t\t'{speedlist[alias]}'")
+        print('\n')
+
+    elif choice == 'add':
+        alias = input('\n\tEnter command alias: ')
+
+        if alias == 'show' or alias == 'add' or alias == 'rm' or alias in speedlist.keys():
+            print(f'\nPYSH : You cannot set {alias} as an alias as it is in use.')
+
+        else:
+            command = input('\n\tEnter command to perform: ')
+
+            speedlist[alias] = command
+            speedFile = open(listLocation, "wb")
+            pickle.dump(speedlist, speedFile)
+            speedFile.close()
+
+    elif choice[:4] == 'edit':
+        alias = input('\n\tEnter command alias: ')
+
+        if alias in speedlist.keys():
+            newcmd = input('\n\tEnter the new command to perform: ')
+            speedlist[alias] = newcmd
+            speedFile = open(listLocation, "wb")
+            pickle.dump(speedlist, speedFile)
+            speedFile.close()
+        
+        else:
+            add = input('PYSH : Alias does not exist. Would you like to add one now (Y/N)?')
+            if add.strip().lower() == 'y':
+                speed_Command('add')
+
+    elif choice[:2] == 'rm':
+        alias = input('Enter command alias which you would like to remove: ')
+        
+        del speedlist[alias]
+        
+        speedFile = open(listLocation, "wb")
+        pickle.dump(speedlist, speedFile)
+        speedFile.close()
+
+    else:
+        try:
+            run_cmd(speedlist[choice])
+
+        except Exception as ex:
+            print(ex)
+    
+    print('\n')
+    return True
+
 
 def merge_GivenDirs(lst, currentPath, targetPath, deleteOriginal=False):
     try:
@@ -165,7 +251,7 @@ def make_Link(srcfilePath, destfilePath):
     return True
 
 
-def move_item(currentfilePath, currentfilename, newfilePath):
+def move_item(currentfilePath, newfilePath):
     try:
         shutil.move(currentfilePath, newfilePath)
     except Exception as exc:
@@ -311,12 +397,15 @@ def show_list():
 
 
 def change_dir(path):
-    path = path.strip().split(' ')
-    mode = path[-1]
+    path = path.strip()
+    mode = path[-3:]
     try:
-        os.chdir(os.path.abspath(path[0]))
         if mode == '-ls':
+            os.chdir(os.path.abspath(path[:-3]))
             show_list()
+
+        else:
+            os.chdir(os.path.abspath(path))
 
     except:
         print(f'PYSH | {curpath} | cd: No such file or directory: {path[0]}')
@@ -440,6 +529,30 @@ def run_help():
         Mode: -a -d
         Mode Usage: $ merge -a {target directory} -d
         Mode Function: Merges all directories in the current location into the target directory and delete the original directories upon merging.
+        ''',
+
+        'speed':
+        '''
+        Usage: $ speed {alias}
+        Function: Allows user to set their own aliases for any command.
+
+        In-Built Aliases:
+        
+        Alias: show
+        Alias Usage: $ speed show
+        Alias Function: Prints all the user-defined aliases.
+
+        Alias: add
+        Alias Usage: $ speed add
+        Alias Function: Adds a new user-defined alias and its corresponding function.
+
+        Alias: edit
+        Alias Usage: $ speed edit
+        Alias Function: Changes the command given to the specified user-defined alias.
+
+        Alias: rm
+        Alias Usage: $ speed rm
+        Alias Function: Removes the specified user-defined alias.
         ''',
     }
 
