@@ -474,13 +474,13 @@ def run_help():
         'edit':
         '''
         Usage: $ edit {file name}.{file extension} OR $ edit {file location}
-        Function: Used to edit an existing file. Creates a blank file for editting if one doesn't exist.
+        Function: Used to edit an existing file. Creates a blank file for editing if one doesn't exist.
         ''',
 
         'read':
         '''
         Usage: $ read {file name}.{file extension} OR $ read {file location}
-        Function: Used to merely read an existing file. Does not work if file doesn't exist.
+        Function: Used to merely read an existing file. Does not work if the file doesn't exist.
         ''',
 
         'rename':
@@ -504,7 +504,7 @@ def run_help():
         'rm':
         '''
         Usage: $ rm {name of file/directory to remove} OR $ rm {location of file/directory to remove}
-        Function: Deletes a file or directory permanently. Asks confirmation for non-empty directories. Does not work if file doesn't exist.
+        Function: Deletes a file or directory permanently. Asks confirmation for non-empty directories. Does not work if the file doesn't exist.
         ''',
 
         'mv':
@@ -534,7 +534,7 @@ def run_help():
         'speed':
         '''
         Usage: $ speed {alias}
-        Function: Allows user to set their own aliases for any command.
+        Function: Allows users to set their own aliases for any command.
 
         In-Built Aliases:
         
